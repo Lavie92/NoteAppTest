@@ -27,8 +27,9 @@
         android:textColor="#ffde59"
         android:textSize="20sp" />
 
+
     <EditText
-        android:id="@+id/edtSearch"
+        android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="49dp"
         android:layout_below="@+id/tvTitle"
@@ -42,23 +43,23 @@
         android:hint="Tìm kiếm ghi chú"
         android:textColor="#9C9C9C"
         android:textColorHint="#9C9C9C" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/edtSearch"
+        android:layout_below="@+id/searchView"
         android:layout_above="@+id/btnCreateNote"
         android:layout_centerVertical="true"
         android:orientation="vertical">
 
         <!-- RecyclerView -->
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/btnCreateNote"
             android:layout_below="@+id/edtSearch" />
-
     </LinearLayout>
 
 
@@ -75,5 +76,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="create"
         android:drawableLeft="@drawable/add01" />
+
+
 
 </RelativeLayout>

@@ -40,6 +40,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder>  {
     NoteFirebaseDAO noteFirebaseDAO;
     private OnItemClickListener itemClickListener;
 
+    public void updateNotes(List<Note> newNotes) {
+        noteList.clear();
+        noteList.addAll(newNotes);
+        notifyDataSetChanged();
+    }
+
+    public void setNotes(List<Note> notes) {
+        noteList.clear();
+        noteList.addAll(notes);
+    }
+
     public interface OnDataChangeListener {
         void onDataChanged(List<Note> notes);
     }
