@@ -15,18 +15,20 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import com.example.myapplication.adapter.NoteAdapter;
 import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.models.Note;
-
+import com.example.myapplication.models.NoteSingleton;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
-    Button btnBack, btnSave;
+
+    Button btnBack;
     EditText editTextContent;
     TextWatcher textWatcher;
+    final Note newNote = NoteSingleton.getInstance().getNote();
+
     List<Note> noteList = new ArrayList<>();
     NoteFirebaseDAO noteFirebaseDAO;
     int i = 0;
@@ -38,74 +40,109 @@ public class HomeActivity extends AppCompatActivity {
         editTextContent = findViewById(R.id.editTextContent);
         btnBack = findViewById(R.id.btnBackToHome);
         noteFirebaseDAO = new NoteFirebaseDAO(this);
-        NoteAdapter noteAdapter = new NoteAdapter(noteList, getApplicationContext(), noteFirebaseDAO);
-        btnSave = findViewById(R.id.btnSave);
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String idNote = String.valueOf(i++);
-                String content = editTextContent.getText().toString();
-                Note note = new Note(idNote, content);
-                noteFirebaseDAO.Insert(note);
-                finish();
-            }
-        });
-        // Initialize the TextWatcher
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            Note note = (Note) bundle.getSerializable("note");
+            editTextContent.setText(note.getContent());
+        }
         textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // This method is called before the text changes
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // This method is called as the text changes
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-                // This method is called after the text changes
+                long currentTimeMillis = System.currentTimeMillis();
+                Date date = new Date(currentTimeMillis);
+                newNote.setDateTime(date);
+                newNote.setContent(s.toString());
+
+                    noteFirebaseDAO.Update(newNote);
+                if (intent.hasExtra("note")) {
+                    Note note = (Note) intent.getSerializableExtra("note");
+                    note.setDateTime(date);
+                    note.setContent(s.toString());
+                    noteFirebaseDAO.Update(note);
+                }
                 handleTextChange(s);
             }
         };
-
-        // Attach the TextWatcher to the EditText
         editTextContent.addTextChangedListener(textWatcher);
-        // Set onClickListener for the back button
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
+
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        String content = editTextContent.getText().toString().trim();
+        Intent intent = getIntent();
+        if (intent.hasExtra("note")) {
+            Note note = (Note) intent.getSerializableExtra("note");
+            if (content.isEmpty() && note != null) {
+                noteFirebaseDAO.deleteNote(note.getId());
+            }
+        }
+        else if (content.isEmpty() && newNote != null) {
+            noteFirebaseDAO.deleteNote(newNote.getId());
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        String content = editTextContent.getText().toString().trim();
+
+        if (content.isEmpty()) {
+            noteFirebaseDAO.deleteNote(newNote.getId());
+        }
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            Note note = (Note) bundle.getSerializable("note");
+            if (note.getContent().toString().trim().isEmpty())
+                noteFirebaseDAO.deleteNote(note.getId());
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        String content = editTextContent.getText().toString().trim();
+        if (content.isEmpty()) {
+            noteFirebaseDAO.deleteNote(newNote.getId());
+        }
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            Note note = (Note) bundle.getSerializable("note");
+            if (note.getContent().toString().trim().isEmpty())
+            noteFirebaseDAO.deleteNote(note.getId());
+        }
     }
 
     private void handleTextChange(Editable editable) {
+
         String text = editable.toString();
         int lineBreakIndex = text.indexOf("\n");
-
         if (lineBreakIndex != -1) {
             SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-
-            // Apply formatting to the first line (title)
             ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, lineBreakIndex,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new RelativeSizeSpan(1.5f), 0, lineBreakIndex,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            // Temporarily remove the TextWatcher to avoid the loop
             editTextContent.removeTextChangedListener(textWatcher);
-
-            // Get the current cursor position
             int cursorPosition = editTextContent.getSelectionStart();
-
-            // Set the formatted text back to the EditText
             editTextContent.setText(ssb);
-
-            // Reattach the TextWatcher
             editTextContent.addTextChangedListener(textWatcher);
-
-            // Restore cursor position
             editTextContent.setSelection(cursorPosition);
         }
     }

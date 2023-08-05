@@ -31,22 +31,6 @@ public class NoteFirebaseDAO {
         db = FirebaseFirestore.getInstance();
         this.context = context;
     }
-    public void Update(String NoteId, Note updatedNote) {
-        HashMap<String, Object> mapNote = updatedNote.convertHashMap();
-        db.collection("Note").document(NoteId)
-                .update(mapNote) // Sử dụng phương thức update để cập nhật dữ liệu vào Firestore
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Toast.makeText(context, "Cập nhật sp thành công!", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Cập nhật sp thất bại!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
     public interface LoadNotesCallback {
         void onNotesLoaded(List<Note> notes);
     }
@@ -82,35 +66,20 @@ public class NoteFirebaseDAO {
 
                     @Override
                     public void onSuccess(Void unused) {
-                        Toast.makeText(context, "Thêm mới note thành công!",
-                                Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Thêm mới note thất bại!",
-                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-    public void Delete(String NoteId) {
-        db.collection("Note").document(NoteId)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-
-                    public void onSuccess(Void unused) {
-
-                        Toast.makeText(context, "Xóa note thành công!",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, " Xóa note thất bại!",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+    public void Update(Note note) {
+        if (note.getId() != null) {
+            db.collection("Note").document(note.getId()).set(note);
+        }
+    }
+    public void deleteNote(String id) {
+        db.collection("Note").document(id)
+                .delete();
     }
 }

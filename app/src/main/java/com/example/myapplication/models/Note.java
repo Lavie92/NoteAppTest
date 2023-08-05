@@ -1,11 +1,12 @@
 package com.example.myapplication.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class Note {
+public class Note implements Serializable {
     private String id;
     private Date dateTime;
 
@@ -14,7 +15,7 @@ public class Note {
     public Note() {
     }
 
-    public Note(String id, String content) {
+    public Note(String content) {
         this.id = id;
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);
@@ -39,7 +40,7 @@ public class Note {
     }
 
     public String getContent() {
-        return content;
+        return content == null ? "" : content;
     }
 
     public void setContent(String content) {
