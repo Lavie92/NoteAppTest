@@ -2,9 +2,21 @@ package com.example.myapplication;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Spannable;
@@ -15,23 +27,29 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
 import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
+import com.example.myapplication.service.ForegroundAlarmService;
+import com.example.myapplication.woker.AlarmWorker;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
-
     Button btnBack;
     EditText editTextContent;
     TextWatcher textWatcher;
+    Button btnAlarm;
     final Note newNote = NoteSingleton.getInstance().getNote();
-
-    List<Note> noteList = new ArrayList<>();
     NoteFirebaseDAO noteFirebaseDAO;
     int i = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,9 +68,11 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
+
             @Override
             public void afterTextChanged(Editable s) {
                 long currentTimeMillis = System.currentTimeMillis();
@@ -60,7 +80,7 @@ public class HomeActivity extends AppCompatActivity {
                 newNote.setDateTime(date);
                 newNote.setContent(s.toString());
 
-                    noteFirebaseDAO.Update(newNote);
+                noteFirebaseDAO.Update(newNote);
                 if (intent.hasExtra("note")) {
                     Note note = (Note) intent.getSerializableExtra("note");
                     note.setDateTime(date);
@@ -77,8 +97,58 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
             }
         });
+        btnAlarm = findViewById(R.id.btnAlarm);
+        btnAlarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showTimePickerDialog(view);
+            }
+        });
 
     }
+
+    public void showTimePickerDialog(View view) {
+        Calendar now = Calendar.getInstance();
+        int hour = now.get(Calendar.HOUR_OF_DAY);
+        int minute = now.get(Calendar.MINUTE);
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                this,
+                new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        Calendar alarmCalendar = Calendar.getInstance();
+                        alarmCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        alarmCalendar.set(Calendar.MINUTE, minute);
+                        long alarmTime = alarmCalendar.getTimeInMillis();
+
+                        long currentTimeMillis = System.currentTimeMillis();
+                        if (alarmTime <= currentTimeMillis) {
+                            // Thời gian báo thức đã qua, không cần đặt
+                            Toast.makeText(HomeActivity.this, "Thời gian báo thức đã qua", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        Data inputData = new Data.Builder()
+                                .putLong("alarm_time", alarmTime)
+                                .build();
+
+                        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(AlarmWorker.class)
+                                .setInputData(inputData)
+                                .build();
+
+                        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+
+                        Toast.makeText(HomeActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                hour,
+                minute,
+                true
+        );
+        timePickerDialog.show();
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -89,11 +159,11 @@ public class HomeActivity extends AppCompatActivity {
             if (content.isEmpty() && note != null) {
                 noteFirebaseDAO.deleteNote(note.getId());
             }
-        }
-        else if (content.isEmpty() && newNote != null) {
+        } else if (content.isEmpty() && newNote != null) {
             noteFirebaseDAO.deleteNote(newNote.getId());
         }
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -112,6 +182,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -124,7 +195,7 @@ public class HomeActivity extends AppCompatActivity {
         if (bundle != null) {
             Note note = (Note) bundle.getSerializable("note");
             if (note.getContent().toString().trim().isEmpty())
-            noteFirebaseDAO.deleteNote(note.getId());
+                noteFirebaseDAO.deleteNote(note.getId());
         }
     }
 

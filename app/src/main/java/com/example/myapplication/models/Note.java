@@ -11,6 +11,24 @@ public class Note implements Serializable {
     private Date dateTime;
 
     private String content;
+    private long timeAlarm;
+    private boolean isReminder;
+
+    public long getTimeAlarm() {
+        return timeAlarm;
+    }
+
+    public void setTimeAlarm(long timeAlarm) {
+        this.timeAlarm = timeAlarm;
+    }
+
+    public boolean isReminder() {
+        return isReminder;
+    }
+
+    public void setReminder(boolean reminder) {
+        isReminder = reminder;
+    }
 
     public Note() {
     }
@@ -21,6 +39,7 @@ public class Note implements Serializable {
         Date date = new Date(currentTimeMillis);
         this.dateTime = date;
         this.content = content;
+        isReminder = false;
     }
 
     public String getId() {
@@ -51,6 +70,8 @@ public class Note implements Serializable {
         work.put("id", id);
         work.put("content", content);
         work.put("dateTime", dateTime);
+        work.put("timeAlarm", timeAlarm);
+        work.put("isReminder", isReminder);
         return work;
     }
 }
