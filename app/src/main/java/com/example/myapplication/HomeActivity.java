@@ -33,7 +33,6 @@ import android.widget.Toast;
 import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
-import com.example.myapplication.service.ForegroundAlarmService;
 import com.example.myapplication.woker.AlarmWorker;
 
 import java.util.ArrayList;
@@ -125,21 +124,12 @@ public class HomeActivity extends AppCompatActivity {
                         long currentTimeMillis = System.currentTimeMillis();
                         if (alarmTime <= currentTimeMillis) {
                             // Thời gian báo thức đã qua, không cần đặt
-                            Toast.makeText(HomeActivity.this, "Thời gian báo thức đã qua", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HomeActivity.this, "Thời gian báo thức đã qua",
+                                    Toast.LENGTH_SHORT).show();
                             return;
                         }
-
-                        Data inputData = new Data.Builder()
-                                .putLong("alarm_time", alarmTime)
-                                .build();
-
-                        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(AlarmWorker.class)
-                                .setInputData(inputData)
-                                .build();
-
-                        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
-
-                        Toast.makeText(HomeActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT).show();
+                        Note note = getNoteToBeDisplayed();
+                        setAlarm(alarmTime, note);
                     }
                 },
                 hour,
@@ -147,6 +137,27 @@ public class HomeActivity extends AppCompatActivity {
                 true
         );
         timePickerDialog.show();
+    }
+
+    private void setAlarm(long alarmTime, Note note) {
+        Data inputData = new Data.Builder()
+                .putLong("alarm_time", alarmTime)
+                .putString("note_id", note.getId())
+                .putString("note_content", note.getContent())
+                .putBoolean("note_is_reminder", note.isReminder())
+                .build();
+
+        OneTimeWorkRequest workRequest =
+                new OneTimeWorkRequest.Builder(AlarmWorker.class)
+                        .setInputData(inputData)
+                        .build();
+
+        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+        note.setTimeAlarm(alarmTime);
+        note.setReminder(true);
+        noteFirebaseDAO.Update(note);
+        Toast.makeText(HomeActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT)
+                .show();
     }
 
     @Override
@@ -217,4 +228,10 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    public Note getNoteToBeDisplayed() {
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        Note note = (Note) bundle.getSerializable("note");
+        return note;
+    }
 }

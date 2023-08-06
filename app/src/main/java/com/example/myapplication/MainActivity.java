@@ -5,7 +5,11 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +21,8 @@ import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.decoration.SpacingItemDecoration;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
+import com.example.myapplication.woker.ConstantsManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +40,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = "My Channel"; // Tên kênh
+                String description = "Channel description"; // Mô tả kênh
+                int importance = NotificationManager.IMPORTANCE_HIGH; // Độ quan trọng
+                NotificationChannel
+                        channel = new NotificationChannel(ConstantsManager.CHANNEL_ID, name, importance);
+                channel.setDescription(description);
+
+                NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                notificationManager.createNotificationChannel(channel);
+            }
 
         noteAdapter = new NoteAdapter(filteredNotes, getApplicationContext(), noteFirebaseDAO);
         noteFirebaseDAO.listenNote(new NoteAdapter.OnDataChangeListener() {
