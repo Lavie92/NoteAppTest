@@ -5,6 +5,7 @@
     android:sharedUserMaxSdkVersion="32">
 
     <protected-broadcast android:name="com.motorola.motocare.INTENT_TRIGGER" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -27,6 +28,15 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
         <activity
+            android:name=".auth.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.SignInActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.HomeActivity"
+            android:exported="false" />
+        <activity
             android:name=".NoteDetailActivity"
             android:exported="false" />
         <activity
@@ -34,9 +44,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver android:name=".receiver.DismissReceiver" />
     </application>
+
 </manifest>

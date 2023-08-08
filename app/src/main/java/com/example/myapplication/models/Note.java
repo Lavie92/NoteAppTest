@@ -1,5 +1,7 @@
 package com.example.myapplication.models;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,7 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Note implements Serializable {
+    private FirebaseAuth mAuth;
     private String id;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     private Date dateTime;
 
     private String content;
@@ -25,11 +38,13 @@ public class Note implements Serializable {
     }
 
     public Note(String content) {
+        mAuth = FirebaseAuth.getInstance();
         this.id = id;
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);
         this.dateTime = date;
         this.content = content;
+        this.userId = mAuth.getCurrentUser().getUid();
     }
 
     public String getId() {

@@ -23,10 +23,13 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.myapplication.auth.HomeActivity;
 import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
 import com.example.myapplication.woker.AlarmWorker;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -36,14 +39,26 @@ public class NoteDetailActivity extends AppCompatActivity {
     EditText editTextContent;
     TextWatcher textWatcher;
     Button btnAlarm;
+    private String currentUserId;
     final Note newNote = NoteSingleton.getInstance().getNote();
     NoteFirebaseDAO noteFirebaseDAO;
+    private FirebaseAuth mAuth;
     int i = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_detail);
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Intent intent = new Intent(NoteDetailActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            currentUserId = currentUser.getUid();
+        }
         editTextContent = findViewById(R.id.editTextContent);
         btnBack = findViewById(R.id.btnBackToHome);
         noteFirebaseDAO = new NoteFirebaseDAO(this);
@@ -69,12 +84,13 @@ public class NoteDetailActivity extends AppCompatActivity {
                 Date date = new Date(currentTimeMillis);
                 newNote.setDateTime(date);
                 newNote.setContent(s.toString());
-
+                newNote.setUserId(currentUserId);
                 noteFirebaseDAO.Update(newNote);
                 if (intent.hasExtra("note")) {
                     Note note = (Note) intent.getSerializableExtra("note");
                     note.setDateTime(date);
                     note.setContent(s.toString());
+                    note.setUserId(currentUserId);
                     noteFirebaseDAO.Update(note);
                 }
                 handleTextChange(s);
@@ -143,6 +159,7 @@ public class NoteDetailActivity extends AppCompatActivity {
 
         WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
         note.setTimeAlarm(alarmTime);
+        note.setUserId(currentUserId);
         noteFirebaseDAO.Update(note);
         Toast.makeText(NoteDetailActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT)
                 .show();

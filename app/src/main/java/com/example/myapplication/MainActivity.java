@@ -17,11 +17,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import com.example.myapplication.adapter.NoteAdapter;
+import com.example.myapplication.auth.HomeActivity;
+import com.example.myapplication.auth.SignUpActivity;
 import com.example.myapplication.dao.NoteFirebaseDAO;
 import com.example.myapplication.decoration.SpacingItemDecoration;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
 import com.example.myapplication.woker.ConstantsManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +34,11 @@ public class MainActivity extends AppCompatActivity {
 
     List<Note> noteList = new ArrayList<>();
     List<Note> filteredNotes = new ArrayList<>();
-
     Button btnCreateNote;
-    EditText editTextSearch; // Changed from SearchView to EditText
+    EditText editTextSearch;
     NoteAdapter noteAdapter;
+    private FirebaseAuth mAuth;
+    FirebaseUser currentUser;
     private NoteFirebaseDAO noteFirebaseDAO = new NoteFirebaseDAO(this);
 
     @Override
@@ -42,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 CharSequence name = "My Channel"; // Tên kênh
-                String description = "Channel description"; // Mô tả kênh
-                int importance = NotificationManager.IMPORTANCE_HIGH; // Độ quan trọng
+                String description = "Channel description"; //
+                int importance = NotificationManager.IMPORTANCE_HIGH;
                 NotificationChannel
                         channel = new NotificationChannel(ConstantsManager.CHANNEL_ID, name, importance);
                 channel.setDescription(description);
@@ -52,13 +57,30 @@ public class MainActivity extends AppCompatActivity {
                 notificationManager.createNotificationChannel(channel);
             }
 
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        if(currentUser == null){
+            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+            startActivity(intent);
+        }
+        Button btnSignOut = findViewById(R.id.btnSignOut);
+
+        btnSignOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         noteAdapter = new NoteAdapter(filteredNotes, getApplicationContext(), noteFirebaseDAO);
         noteFirebaseDAO.listenNote(new NoteAdapter.OnDataChangeListener() {
             @Override
             public void onDataChanged(List<Note> notes) {
                 noteList.clear();
                 noteList.addAll(notes);
-                filterNotes("");
+                filterUserNotes("");
                 noteAdapter.notifyDataSetChanged();
             }
         });
@@ -76,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         noteAdapter.setItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Note note) {
@@ -98,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                filterNotes(charSequence.toString());
+                filterUserNotes(charSequence.toString());
             }
 
             @Override
@@ -134,13 +157,15 @@ public class MainActivity extends AppCompatActivity {
         helper.attachToRecyclerView(rcNote);
     }
 
-    private void filterNotes(String searchText) {
+    private void filterUserNotes(String searchText) {
         filteredNotes.clear();
         for (Note note : noteList) {
-            if (note.getContent().toLowerCase().contains(searchText.toLowerCase())) {
+            if (note.getContent().toLowerCase().contains(searchText.toLowerCase())
+                    && note.getUserId() != null && note.getUserId().equals(currentUser.getUid())) {
                 filteredNotes.add(note);
             }
         }
         noteAdapter.notifyDataSetChanged();
     }
+
 }

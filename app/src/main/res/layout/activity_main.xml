@@ -8,9 +8,9 @@
 
     <!-- Toolbar -->
     <Button
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/btnSignOut"
+        android:layout_width="114dp"
+        android:layout_height="89dp"
         android:background="@android:color/transparent"
         android:contentDescription="back"
         android:drawableLeft="@drawable/back01" />
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="37dp"
-        android:layout_toRightOf="@id/btnBack"
+        android:layout_toRightOf="@id/btnSignOut"
         android:fontFamily="sans-serif-condensed-medium"
         android:text="Thư mục"
         android:textColor="#ffde59"
@@ -76,7 +76,6 @@
         android:background="@android:color/transparent"
         android:contentDescription="create"
         android:drawableLeft="@drawable/add01" />
-
 
 
 </RelativeLayout>
