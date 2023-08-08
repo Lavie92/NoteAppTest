@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +38,5 @@
             </intent-filter>
         </activity>
         <receiver android:name=".receiver.DismissReceiver" />
-
     </application>
 </manifest>
