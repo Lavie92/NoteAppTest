@@ -8,7 +8,7 @@
     tools:context=".auth.SignInActivity">
 
     <TextView
-        android:id="@+id/tvSignIn"
+        android:id="@+id/tvSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -33,7 +33,7 @@
         android:text="Don't have an account?"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/tvSignIn"
+        app:layout_constraintEnd_toStartOf="@+id/tvSignUp"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -92,7 +92,7 @@
         android:drawableLeft="@drawable/email"
         android:ems="10"
         android:fontFamily="sans-serif-condensed-medium"
-        android:hint="    Email"
+        android:hint="Email"
         android:inputType="textEmailAddress"
         android:paddingLeft="20dp"
         android:textColor="#9C9C9C"
