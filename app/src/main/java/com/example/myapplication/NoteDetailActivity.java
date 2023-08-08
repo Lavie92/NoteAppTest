@@ -2,21 +2,14 @@ package com.example.myapplication;
 
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Spannable;
@@ -35,12 +28,10 @@ import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
 import com.example.myapplication.woker.AlarmWorker;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
-public class HomeActivity extends AppCompatActivity {
+public class NoteDetailActivity extends AppCompatActivity {
     Button btnBack;
     EditText editTextContent;
     TextWatcher textWatcher;
@@ -52,7 +43,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_note_detail);
         editTextContent = findViewById(R.id.editTextContent);
         btnBack = findViewById(R.id.btnBackToHome);
         noteFirebaseDAO = new NoteFirebaseDAO(this);
@@ -123,8 +114,7 @@ public class HomeActivity extends AppCompatActivity {
 
                         long currentTimeMillis = System.currentTimeMillis();
                         if (alarmTime <= currentTimeMillis) {
-                            // Thời gian báo thức đã qua, không cần đặt
-                            Toast.makeText(HomeActivity.this, "Thời gian báo thức đã qua",
+                            Toast.makeText(NoteDetailActivity.this, "Thời gian báo thức đã qua",
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -144,7 +134,6 @@ public class HomeActivity extends AppCompatActivity {
                 .putLong("alarm_time", alarmTime)
                 .putString("note_id", note.getId())
                 .putString("note_content", note.getContent())
-                .putBoolean("note_is_reminder", note.isReminder())
                 .build();
 
         OneTimeWorkRequest workRequest =
@@ -154,9 +143,8 @@ public class HomeActivity extends AppCompatActivity {
 
         WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
         note.setTimeAlarm(alarmTime);
-        note.setReminder(true);
         noteFirebaseDAO.Update(note);
-        Toast.makeText(HomeActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT)
+        Toast.makeText(NoteDetailActivity.this, "Đã đặt báo thức", Toast.LENGTH_SHORT)
                 .show();
     }
 
@@ -231,7 +219,10 @@ public class HomeActivity extends AppCompatActivity {
     public Note getNoteToBeDisplayed() {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        Note note = (Note) bundle.getSerializable("note");
-        return note;
+        if (bundle != null) {
+            Note note = (Note) bundle.getSerializable("note");
+            return note;
+        }
+        return newNote;
     }
 }

@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 NoteSingleton.getInstance().getNote().setContent("");
                 noteFirebaseDAO.Insert(NoteSingleton.getInstance().getNote());
-                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                Intent intent = new Intent(MainActivity.this, NoteDetailActivity.class);
                 startActivity(intent);
             }
         });
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(Note note) {
                 if (note != null) {
-                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                    Intent intent = new Intent(MainActivity.this, NoteDetailActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("note", note);
                     intent.putExtras(bundle);

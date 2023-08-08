@@ -44,11 +44,9 @@ public class AlarmWorker extends Worker {
         Data inputData = getInputData();
         long alarmTime = inputData.getLong("alarm_time", 0);
         String noteContent = inputData.getString("note_content");
-        String noteId = inputData.getString("note_id");
-        boolean noteIsReminder = inputData.getBoolean("note_is_reminder", false);
         long currentTime = System.currentTimeMillis();
 
-        if (alarmTime > currentTime && noteIsReminder == true) {
+        if (alarmTime > currentTime) {
 
             try {
                 long delay = alarmTime - currentTime;
