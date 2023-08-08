@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         if(currentUser == null){
             Intent intent = new Intent(MainActivity.this, HomeActivity.class);
             startActivity(intent);
+            finish();
         }
         Button btnSignOut = findViewById(R.id.btnSignOut);
 
@@ -80,10 +81,14 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChanged(List<Note> notes) {
                 noteList.clear();
                 noteList.addAll(notes);
-                filterUserNotes("");
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                if (currentUser != null) {
+                    filterUserNotes("");
+                }
                 noteAdapter.notifyDataSetChanged();
             }
         });
+
 
         RecyclerView rcNote = findViewById(R.id.rcNote);
         SpacingItemDecoration itemDecoration = new SpacingItemDecoration();
