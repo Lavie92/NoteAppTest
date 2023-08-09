@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     NoteAdapter noteAdapter;
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    Button btnWeather;
     private NoteFirebaseDAO noteFirebaseDAO = new NoteFirebaseDAO(this);
 
     @Override
@@ -130,6 +131,14 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+        btnWeather = findViewById(R.id.btnWeather);
+        btnWeather.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, WeatherActivity.class);
+                startActivity(intent);
             }
         });
         noteAdapter = new NoteAdapter(filteredNotes, getApplicationContext(), noteFirebaseDAO);

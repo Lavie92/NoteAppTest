@@ -1,16 +1,24 @@
 package com.example.myapplication;
 
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -20,6 +28,7 @@ import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -31,6 +40,7 @@ import com.example.myapplication.woker.AlarmWorker;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -44,6 +54,8 @@ public class NoteDetailActivity extends AppCompatActivity {
     NoteFirebaseDAO noteFirebaseDAO;
     private FirebaseAuth mAuth;
     int i = 0;
+    public int CHON_ANH = 0;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,8 +123,57 @@ public class NoteDetailActivity extends AppCompatActivity {
             }
         });
         Button btnSave = findViewById(R.id.btnSave);
-    }
 
+        imageView = findViewById(R.id.imageView);
+        findViewById(R.id.btnTakePhoto).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CharSequence[] optionsMenu = {"Chụp ảnh", "Chọn ảnh", "Thoát"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(NoteDetailActivity.this);
+                builder.setItems(optionsMenu, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (optionsMenu[i].equals("Chụp ảnh")) {
+                            // Mở camera để chụp ảnh
+                            CHON_ANH = 1;
+                            Intent takePicture = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                            getData.launch(takePicture);
+                        } else if (optionsMenu[i].equals("Chọn ảnh")) {
+                            // Chọn ảnh từ bộ sưu tập
+                            CHON_ANH = 2;
+                            Intent pickPhoto = new Intent(Intent.ACTION_GET_CONTENT);
+                            pickPhoto.setType("image/*");
+                            getData.launch(pickPhoto);
+                        } else if (optionsMenu[i].equals("Thoát")) {
+                            dialogInterface.dismiss();
+                        }
+                    }
+                });
+                builder.show();
+            }
+        });
+    }
+    ActivityResultLauncher<Intent> getData = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Bitmap selectedImage = null;
+                    if (CHON_ANH == 1) {
+                        // Chụp ảnh từ camera
+                        selectedImage = (Bitmap) data.getExtras().get("data");
+                    } else if (CHON_ANH == 2) {
+                        // Chọn ảnh từ bộ sưu tập
+                        Uri selectedImageUri = data.getData();
+                        try {
+                            selectedImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    imageView.setImageBitmap(selectedImage);
+                }
+            });
     public void showTimePickerDialog(View view) {
         Calendar now = Calendar.getInstance();
         int hour = now.get(Calendar.HOUR_OF_DAY);

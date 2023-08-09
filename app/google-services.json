@@ -22,7 +22,7 @@
           }
         },
         {
-          "client_id": "938016318355-irf2cu9hgtal5g76gube4nnhvks117lq.apps.googleusercontent.com",
+          "client_id": "938016318355-a2u4qljdl7bm9ac5b63bauqae77lovll.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +35,36 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "938016318355-irf2cu9hgtal5g76gube4nnhvks117lq.apps.googleusercontent.com",
+              "client_id": "938016318355-5ehhm1jao901dd16j492ioc51ukvinuk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938016318355:android:83063243f0fbd1d42afe66",
+        "android_client_info": {
+          "package_name": "com.example.pompom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "938016318355-a2u4qljdl7bm9ac5b63bauqae77lovll.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCA1Gl50nrVoLDjQCQJ8x1rxvGtijxKH4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "938016318355-5ehhm1jao901dd16j492ioc51ukvinuk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

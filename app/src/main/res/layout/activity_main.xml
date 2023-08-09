@@ -80,7 +80,15 @@
         android:background="@android:color/transparent"
         android:contentDescription="create"
         android:drawableLeft="@drawable/add02" />
-
+    <Button
+        android:id="@+id/btnWeather"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="200dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="create"
+        android:drawableLeft="@drawable/cloudy2" />
     <TextView
         android:id="@+id/tvAccountSetting"
         android:layout_width="wrap_content"
