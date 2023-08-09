@@ -28,6 +28,9 @@ import com.example.myapplication.decoration.SpacingItemDecoration;
 import com.example.myapplication.models.Note;
 import com.example.myapplication.models.NoteSingleton;
 import com.example.myapplication.woker.ConstantsManager;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     List<Note> filteredNotes = new ArrayList<>();
     Button btnCreateNote;
     EditText editTextSearch;
+    private GoogleSignInClient mGoogleSignInClient;
+
     NoteAdapter noteAdapter;
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
@@ -114,6 +119,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
+                GoogleSignInOptions gso =
+                        new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(getString(R.string.default_web_client_id))
+                                .requestEmail()
+                                .build();
+                mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
+                mGoogleSignInClient.signOut();
+
                 Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
@@ -142,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 NoteSingleton.getInstance().getNote().setContent("");
+                NoteSingleton.getInstance().setNoteUserId(currentUser.getUid());
                 noteFirebaseDAO.Insert(NoteSingleton.getInstance().getNote());
                 Intent intent = new Intent(MainActivity.this, NoteDetailActivity.class);
                 startActivity(intent);
@@ -208,13 +222,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void filterUserNotes(String searchText) {
         filteredNotes.clear();
-        for (Note note : noteList) {
-            if (note.getContent().toLowerCase().contains(searchText.toLowerCase())
-                    && note.getUserId() != null && note.getUserId().equals(currentUser.getUid())) {
-                filteredNotes.add(note);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            for (Note note : noteList) {
+                if (note.getContent().toLowerCase().contains(searchText.toLowerCase())
+                        && note.getUserId() != null &&
+                        note.getUserId().equals(user.getUid())) {
+                    filteredNotes.add(note);
+                }
             }
         }
         noteAdapter.notifyDataSetChanged();
     }
+
 
 }

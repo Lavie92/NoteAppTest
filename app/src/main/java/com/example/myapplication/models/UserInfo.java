@@ -11,6 +11,11 @@ public class UserInfo implements Serializable {
     public UserInfo() {
     }
 
+    public UserInfo(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
+
     public UserInfo(String username, String email, String phone) {
         this.username = username;
         this.email = email;

@@ -20,6 +20,9 @@ public class NoteSingleton {
     public Note getNote() {
         return note;
     }
+    public void setNoteUserId(String userId) {
+        note.setUserId(userId);
+    }
 
     public void setNoteContent(String content) {
         note.setContent(content);

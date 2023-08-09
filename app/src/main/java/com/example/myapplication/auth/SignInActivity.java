@@ -19,18 +19,23 @@ import android.widget.Toast;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.models.UserInfo;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult;
 
@@ -42,8 +47,6 @@ public class SignInActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
     private static final String TAG1 = "GoogleActivity";
     private static final int RC_SIGN_IN = 9001;
-    private ActivityResultLauncher<Intent> googleSignInLauncher;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,37 +64,25 @@ public class SignInActivity extends AppCompatActivity {
                 if (email.isEmpty() || password.isEmpty()) {
                     Toast.makeText(SignInActivity.this, "Nhập đủ email và password",
                             Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     signIn(email, password);
                 }
             }
         });
         Button btnSignInGoogle = findViewById(R.id.btnSignInGoogle);
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
+        GoogleSignInOptions gso =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        googleSignInLauncher = registerForActivityResult(new StartActivityForResult(), result -> {
-            if (result.getResultCode() == RC_SIGN_IN) {
-                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
-                try {
-                    // Đăng nhập Google thành công, xác thực với Firebase
-                    GoogleSignInAccount account = task.getResult(ApiException.class);
-                    Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
-                    firebaseAuthWithGoogle(account.getIdToken());
-                } catch (ApiException e) {
-                    Log.w(TAG, "Đăng nhập Google thất bại", e);
-                }
+        btnSignInGoogle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signInGoogle();
             }
-            btnSignInGoogle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    signInGoogle();
-                }
-            });
         });
+
         TextView tvForgot = findViewById(R.id.tvForgot);
         tvForgot.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,44 +94,55 @@ public class SignInActivity extends AppCompatActivity {
                 builder.setView(dialogView);
                 AlertDialog dialog = builder.create();
 
-                dialogView.findViewById(R.id.btnSend).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String userEmail = emailBox.getText().toString().trim();
-                        if (TextUtils.isEmpty(userEmail) && !Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()){
-                            Toast.makeText(SignInActivity.this, "Enter your register email", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        mAuth.sendPasswordResetEmail(userEmail).addOnCompleteListener(new OnCompleteListener<Void>() {
+                dialogView.findViewById(R.id.btnSend)
+                        .setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()){
-                                    Toast.makeText(SignInActivity.this, "Check your email", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                }else {
-                                    Toast.makeText(SignInActivity.this, "Unable to send, failed" ,Toast.LENGTH_SHORT).show();
+                            public void onClick(View view) {
+                                String userEmail = emailBox.getText().toString().trim();
+                                if (TextUtils.isEmpty(userEmail) &&
+                                        !Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
+                                    Toast.makeText(SignInActivity.this, "Enter your register email",
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
                                 }
+                                mAuth.sendPasswordResetEmail(userEmail)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(SignInActivity.this,
+                                                                    "Check your email", Toast.LENGTH_SHORT)
+                                                            .show();
+                                                    dialog.dismiss();
+                                                } else {
+                                                    Toast.makeText(SignInActivity.this,
+                                                            "Unable to send, failed",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
                             }
                         });
-                    }
-                });
-                dialogView.findViewById(R.id.btnCancel).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-                if (dialog.getWindow() != null){
+                dialogView.findViewById(R.id.btnCancel)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                            }
+                        });
+                if (dialog.getWindow() != null) {
                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
                 }
                 dialog.show();
             }
         });
     }
+
     @Override
     public void onStart() {
         super.onStart();
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -153,12 +155,18 @@ public class SignInActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
+                Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
             }
         }
     }
+
+    // Trong phương thức firebaseAuthWithGoogle
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
@@ -166,21 +174,47 @@ public class SignInActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG1, "signInWithCredential:success");
-                            Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
+                            // Đăng nhập Google thành công
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            String userId = user.getUid();
+
+                            String username = user.getDisplayName();
+                            String email = user.getEmail();
+
+                            // Tạo đối tượng UserInfo
+                            UserInfo userInfo = new UserInfo(username, email);
+                            userInfo.setPhone("chưa có");
+                            // Lưu thông tin người dùng vào Firestore
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            db.collection("users").document(userId)
+                                    .set(userInfo)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(SignInActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(SignInActivity.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG1, "signInWithCredential:failure", task.getException());
+                            // Đăng nhập Google thất bại
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
                         }
                     }
                 });
     }
+
+
     private void signInGoogle() {
-        Intent intent = mGoogleSignInClient.getSignInIntent();
-        googleSignInLauncher.launch(intent);
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private void signIn(String email, String password) {
@@ -190,11 +224,13 @@ public class SignInActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
                             Intent intent = new Intent(SignInActivity.this, MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                             finish();
                         } else {
+                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(SignInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();

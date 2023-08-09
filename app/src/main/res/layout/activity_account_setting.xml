@@ -3,25 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:orientation="horizontal">
 
         <!-- Title -->
-        <Button
-            android:id="@+id/btnBackToHome"
-            android:layout_width="271dp"
-            android:layout_height="48dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="250dp"
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:background="@android:color/transparent"
             android:fontFamily="sans-serif-condensed-medium"
             android:text="Cài đặt tài khoản"
@@ -30,77 +26,142 @@
 
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/edtEmail"
-        android:layout_width="309dp"
-        android:layout_height="55dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/fullNameTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="21dp"
+        android:layout_marginTop="80dp"
         android:layout_marginEnd="30dp"
-        android:background="@drawable/custom_text"
-        android:ems="10"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:hint="Nhập mail muốn đổi"
-        android:inputType="text"
-        android:paddingLeft="20dp"
-        android:textColorHint="#9C9C9C" />
+        app:layout_constraintTop_toBottomOf="@+id/textView10">
 
-    <EditText
-        android:id="@+id/edtUserName"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="21dp"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/custom_text"
-        android:ems="10"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:hint="Nhập Username muốn đổi"
-        android:paddingLeft="20dp"
-        android:textColorHint="#9C9C9C" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_text"
+            android:drawableLeft="@drawable/user"
+            android:ems="10"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:hint="  UserName"
+            android:inputType="text"
+            android:paddingLeft="20dp"
+            android:textColor="#9C9C9C"
+            android:textColorHint="#9C9C9C"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <EditText
-        android:id="@+id/edtPhone"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="21dp"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/custom_text"
-        android:ems="10"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:hint="Nhập SĐT muốn đổi"
-        android:paddingLeft="20dp"
-        android:textColorHint="#9C9C9C" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/edtPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/emailTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="21dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="30dp"
-        android:background="@drawable/custom_text"
-        android:ems="10"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:hint="Nhập mật khẩu mới"
-        android:paddingLeft="20dp"
-        android:textColorHint="#9C9C9C" />
+        app:layout_constraintTop_toBottomOf="@+id/fullNameTextInputLayout">
 
-    <EditText
-        android:id="@+id/edtConfirmPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_text"
+            android:drawableLeft="@drawable/email"
+            android:ems="10"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:hint="  Email"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="20dp"
+            android:textColor="#9C9C9C"
+            android:textColorHint="#9C9C9C"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/phoneTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="21dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="30dp"
-        android:background="@drawable/custom_text"
-        android:ems="10"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:hint="Xác nhận mật khẩu mới"
-        android:inputType="text"
-        android:paddingLeft="20dp"
-        android:textColorHint="#9C9C9C" />
+        app:layout_constraintTop_toBottomOf="@+id/emailTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_text"
+            android:drawableLeft="@drawable/phone"
+            android:ems="10"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:hint="  Phone Number"
+            android:inputType="number"
+            android:paddingLeft="20dp"
+            android:textColor="#9c9c9c"
+            android:textColorHint="#9c9c9c"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/passwordTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="30dp"
+        app:passwordToggleTint="@color/black"
+        app:layout_constraintTop_toBottomOf="@+id/phoneTextInputLayout"
+        app:passwordToggleEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_text"
+            android:drawableLeft="@drawable/key"
+            android:ems="10"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:hint="New Password"
+            android:inputType="textPassword"
+            android:paddingLeft="20dp"
+            android:textColorHint="#9C9C9C"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/confirmPasswordTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="15dp"
+        app:passwordToggleTint="@color/black"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintTop_toBottomOf="@+id/passwordTextInputLayout"
+        app:passwordToggleEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtComfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_text"
+            android:drawableLeft="@drawable/key"
+            android:ems="10"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:hint="Comfirm New Password"
+            android:inputType="textPassword"
+            android:paddingLeft="20dp"
+            android:textColorHint="#9C9C9C"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnSave"

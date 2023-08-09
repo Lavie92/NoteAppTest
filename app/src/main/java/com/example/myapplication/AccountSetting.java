@@ -34,7 +34,7 @@ public class AccountSetting extends AppCompatActivity {
         edtPhone = findViewById(R.id.edtPhone);
         edtUsername = findViewById(R.id.edtUserName);
         edtNewPassword = findViewById(R.id.edtPassword);
-        edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
+        edtConfirmPassword = findViewById(R.id.edtComfirmPassword);
         edtEmail = findViewById(R.id.edtEmail);
         Button btnSave = findViewById(R.id.btnSave);
         Intent intent = getIntent();

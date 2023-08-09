@@ -44,7 +44,6 @@ public class Note implements Serializable {
         Date date = new Date(currentTimeMillis);
         this.dateTime = date;
         this.content = content;
-        this.userId = mAuth.getCurrentUser().getUid();
     }
 
     public String getId() {
