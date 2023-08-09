@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     List<Note> noteList = new ArrayList<>();
     List<Note> filteredNotes = new ArrayList<>();
     Button btnCreateNote;
+    Button btnWeather;
     EditText editTextSearch;
     NoteAdapter noteAdapter;
     private FirebaseAuth mAuth;
@@ -147,7 +148,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        btnWeather = findViewById(R.id.btnWeather);
+        btnWeather.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, WeatherActivity.class);
+                startActivity(intent);
+            }
+        });
         noteAdapter.setItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Note note) {

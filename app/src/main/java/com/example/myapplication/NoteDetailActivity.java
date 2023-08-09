@@ -111,6 +111,7 @@ public class NoteDetailActivity extends AppCompatActivity {
             }
         });
         Button btnSave = findViewById(R.id.btnSave);
+
     }
 
     public void showTimePickerDialog(View view) {
