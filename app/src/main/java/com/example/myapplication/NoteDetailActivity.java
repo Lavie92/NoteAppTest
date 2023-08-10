@@ -10,6 +10,7 @@ import androidx.work.WorkManager;
 
 import android.annotation.SuppressLint;
 import android.app.TimePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -17,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -46,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -66,6 +69,7 @@ public class NoteDetailActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private Bitmap imageBitmap;
+    protected static final int RESULT_SPEECH = 1;
 
     private FirebaseAuth mAuth;
     int i = 0;
@@ -132,6 +136,22 @@ public class NoteDetailActivity extends AppCompatActivity {
                 finish();
             }
         });
+        Button btnSpeak = findViewById(R.id.btnSpeak);
+        btnSpeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi");
+                try {
+                    startActivityForResult(intent, RESULT_SPEECH);
+                    editTextContent.setText("");
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getApplicationContext(), "Your device doesn't support Speech to Text", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        });
         btnAlarm = findViewById(R.id.btnAlarm);
         btnAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,22 +166,20 @@ public class NoteDetailActivity extends AppCompatActivity {
             }
         });
         imageView = findViewById(R.id.imageView);
-
-        Glide.with(this).load(note.getImageUrl()).placeholder(R.drawable.logo).dontAnimate()
-                .into(imageView);
+        if (note.getImageUrl() != null) {
+            Glide.with(this).load(note.getImageUrl()).placeholder(R.drawable.logo).dontAnimate()
+                    .into(imageView);
+        }
     }
 
     private void showImagePickerOptions() {
-        // Hiển thị dialog để chọn chụp ảnh hoặc chọn từ thư viện
 
         String[] options = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
-                // Mở camera chụp ảnh
                 takeImageFromCamera();
             } else {
-                // Mở gallery chọn ảnh
                 pickImageFromGallery();
             }
         });
@@ -182,7 +200,6 @@ public class NoteDetailActivity extends AppCompatActivity {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                // Xử lý lỗi nếu cần
             }
 
             if (photoFile != null) {
@@ -211,7 +228,14 @@ public class NoteDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        switch (requestCode){
+            case RESULT_SPEECH:
+                if(resultCode == RESULT_OK && data != null){
+                    ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    editTextContent.setText(text.get(0));
+                }
+                break;
+        }
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (cameraImageUri != null) {
                 try {
