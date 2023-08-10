@@ -50,25 +50,26 @@
         app:layout_constraintVertical_bias="0.458" />
 
     <LinearLayout
+        android:id="@+id/layoutbot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginBottom="20dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:contentDescription="save"
-                android:drawableLeft="@drawable/check04"
-                android:minWidth="0dp"
-                android:minHeight="0dp" />
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:contentDescription="save"
+            android:drawableLeft="@drawable/check04"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
 
         <Button
-            android:id="@+id/textView14"
+            android:id="@+id/btnTakePhoto"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -94,6 +95,12 @@
             android:minHeight="0dp" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="285dp"
+        android:layout_height="135dp"
+        android:layout_centerInParent="true"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
 
 </RelativeLayout>
