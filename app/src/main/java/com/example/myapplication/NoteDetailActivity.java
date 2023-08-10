@@ -3,6 +3,7 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -14,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Spannable;
@@ -39,14 +41,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.type.DateTime;
-import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.lang.ref.Reference;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class NoteDetailActivity extends AppCompatActivity {
     Button btnBack;
@@ -55,6 +57,8 @@ public class NoteDetailActivity extends AppCompatActivity {
     Button btnAlarm;
     FirebaseStorage storage;
     private String currentUserId;
+    private Uri cameraImageUri;
+
     final Note newNote = NoteSingleton.getInstance().getNote();
     NoteFirebaseDAO noteFirebaseDAO;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -72,6 +76,7 @@ public class NoteDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_detail);
         mAuth = FirebaseAuth.getInstance();
+        newNote.setImageUrl(null);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             Intent intent = new Intent(NoteDetailActivity.this, HomeActivity.class);
@@ -83,7 +88,6 @@ public class NoteDetailActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
 
         Note note = getNoteToBeDisplayed();
-
         editTextContent = findViewById(R.id.editTextContent);
         btnBack = findViewById(R.id.btnBackToHome);
         noteFirebaseDAO = new NoteFirebaseDAO(this);
@@ -174,47 +178,77 @@ public class NoteDetailActivity extends AppCompatActivity {
     private void takeImageFromCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Xử lý lỗi nếu cần
+            }
+
+            if (photoFile != null) {
+                cameraImageUri = FileProvider.getUriForFile(this,
+                        "com.example.myapplication.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    private File createImageFile() throws IOException {
+        String timeStamp =
+                new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        return imageFile;
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            if (cameraImageUri != null) {
+                try {
+                    imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), cameraImageUri);
+                    imageView.setImageBitmap(imageBitmap);
+                    uploadImageToFirebase(imageBitmap);
 
-            Bundle extras = data.getExtras();
-            imageBitmap = (Bitmap) extras.get("data");
-            imageView.setImageBitmap(imageBitmap);
-
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         } else if (requestCode == REQUEST_Pick_IMAGE && resultCode == RESULT_OK) {
-
             Uri pickedImage = data.getData();
             try {
                 imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), pickedImage);
                 imageView.setImageBitmap(imageBitmap);
+                uploadImageToFirebase(imageBitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            uploadImageToFirebase(imageBitmap);
-
-
         }
-
-
     }
+
 
     private void uploadImageToFirebase(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
+
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
         StorageReference imagesRef = storageRef.child("images");
         String filename = "image_" + System.currentTimeMillis() + ".jpg";
         StorageReference imageRef = imagesRef.child(filename);
+
         UploadTask uploadTask = imageRef.putBytes(data);
+
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                 String imageUrl = uri.toString();
@@ -223,8 +257,10 @@ public class NoteDetailActivity extends AppCompatActivity {
                 noteFirebaseDAO.Update(note);
             }).addOnFailureListener(exception -> {
             });
+        }).addOnFailureListener(exception -> {
         });
     }
+
 
 
     public void showTimePickerDialog(View view) {
