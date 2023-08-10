@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Note implements Serializable {
-    private FirebaseAuth mAuth;
     private String id;
     private String userId;
 
@@ -25,6 +24,15 @@ public class Note implements Serializable {
 
     private String content;
     private long timeAlarm;
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public long getTimeAlarm() {
         return timeAlarm;
@@ -38,13 +46,11 @@ public class Note implements Serializable {
     }
 
     public Note(String content) {
-        mAuth = FirebaseAuth.getInstance();
         this.id = id;
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);
         this.dateTime = date;
         this.content = content;
-        this.userId = mAuth.getCurrentUser().getUid();
     }
 
     public String getId() {
@@ -76,6 +82,7 @@ public class Note implements Serializable {
         work.put("content", content);
         work.put("dateTime", dateTime);
         work.put("timeAlarm", timeAlarm);
+        work.put("imageUrl", imageUrl);
         return work;
     }
 }
